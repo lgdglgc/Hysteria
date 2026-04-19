@@ -400,7 +400,7 @@ dns:
     - 1.1.1.1
     - 114.114.114.114
 proxies:
-  - name: Hysteria2-lgdglgc
+  - name: SheepKeeperS-Hysteria2
     type: hysteria2
     server: $last_ip
     port: $port
@@ -413,7 +413,7 @@ proxy-groups:
   - name: Proxy
     type: select
     proxies:
-      - Hysteria2-lgdglgc
+      - SheepKeeperS-Hysteria2
 
 rules:
   - GEOIP,CN,DIRECT
@@ -423,11 +423,11 @@ EOF
     # 生成节点分享链接
     if [[ -n $firstport ]]; then
         # 端口跳跃模式：主端口 + mport 参数携带跳跃范围
-        url="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd&mport=$firstport-$endport#Hysteria2-lgdglgc"
-        nohopurl="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd#Hysteria2-lgdglgc"
+        url="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd&mport=$firstport-$endport#SheepKeeperS-Hysteria2"
+        nohopurl="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd#SheepKeeperS-Hysteria2"
     else
         # 单端口模式
-        url="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd#Hysteria2-lgdglgc"
+        url="hysteria2://$auth_pwd@$last_ip:$port/?insecure=1&sni=$hy_domain&obfs=salamander&obfs-password=$obfs_pwd#SheepKeeperS-Hysteria2"
         nohopurl="$url"
     fi
     echo $url > /root/hy/url.txt
