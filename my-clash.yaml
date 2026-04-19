@@ -1,0 +1,54 @@
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: Rule
+log-level: info
+external-controller: :9090
+
+# --- 高级防污染 DNS 配置 (Fake-IP + DoH) ---
+dns:
+  enable: true
+  ipv6: true
+  listen: 0.0.0.0:5353
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query
+    - https://8.8.4.4/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+# --- 节点与策略组占位 ---
+# 这里留 ~ 没问题，代表等待订阅/脚本注入节点
+proxies: ~
+
+proxy-groups:
+  - name: 🔯 Proxy
+    type: select
+    icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Global.png
+    proxies:
+
+# --- 路由规则 ---
+rules:
+  # 局域网直连
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - DOMAIN-SUFFIX,local,DIRECT
+  
+  # 国内直连加速
+  - DOMAIN-SUFFIX,cn,DIRECT
+  - GEOIP,CN,DIRECT
+  
+  # 兜底代理
+  - MATCH,🔯 Proxy
