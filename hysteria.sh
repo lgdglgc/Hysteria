@@ -61,13 +61,10 @@ inst_cert(){
     echo ""
     read -rp "请输入选项 [1-3]: " certInput
     if [[ $certInput == 2 ]]; then
-        cert_path="/root/cert.crt"
-        key_path="/root/private.key"
+        cert_path="/etc/hysteria/cert.crt"
+        key_path="/etc/hysteria/private.key"
 
-        chmod +rw /root/cert.crt 2>/dev/null
-        chmod +rw /root/private.key 2>/dev/null
-
-        if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]] && [[ -f /root/ca.log ]]; then
+        if [[ -f /etc/hysteria/cert.crt && -f /etc/hysteria/private.key ]] && [[ -s /etc/hysteria/cert.crt && -s /etc/hysteria/private.key ]] && [[ -f /root/ca.log ]]; then
             domain=$(cat /root/ca.log)
             green "检测到原有域名：$domain 的证书，正在应用"
             hy_domain=$domain
@@ -104,7 +101,7 @@ inst_cert(){
                     exit 1
                 fi
             fi
-            if [[ $domainIP == $ip ]]; then
+            if [[ $domainIP == $ip || $ipChoice == 1 ]]; then
                 ${PACKAGE_INSTALL[int]} curl wget sudo socat openssl
                 if [[ $SYSTEM == "CentOS" ]]; then
                     ${PACKAGE_INSTALL[int]} cronie
@@ -124,14 +121,17 @@ inst_cert(){
                 else
                     bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --insecure
                 fi
-                bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
-                if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
+                mkdir -p /etc/hysteria
+                bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /etc/hysteria/private.key --fullchain-file /etc/hysteria/cert.crt --ecc
+                
+                if [[ -f /etc/hysteria/cert.crt && -f /etc/hysteria/private.key ]] && [[ -s /etc/hysteria/cert.crt && -s /etc/hysteria/private.key ]]; then
+                    chown hysteria:hysteria /etc/hysteria/cert.crt /etc/hysteria/private.key
+                    chmod 644 /etc/hysteria/cert.crt
+                    chmod 600 /etc/hysteria/private.key
                     echo $domain > /root/ca.log
                     sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
                     echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
-                    green "证书申请成功! 脚本申请到的证书 (cert.crt) 和私钥 (private.key) 文件已保存到 /root 文件夹下"
-                    yellow "证书crt文件路径如下: /root/cert.crt"
-                    yellow "私钥key文件路径如下: /root/private.key"
+                    green "证书申请成功! 脚本申请到的证书已保存到 /etc/hysteria/ 文件夹下"
                     hy_domain=$domain
                 fi
             else
@@ -144,23 +144,34 @@ inst_cert(){
             fi
         fi
     elif [[ $certInput == 3 ]]; then
-        read -p "请输入公钥文件 crt 的路径：" cert_path
-        yellow "公钥文件 crt 的路径：$cert_path "
-        read -p "请输入密钥文件 key 的路径：" key_path
-        yellow "密钥文件 key 的路径：$key_path "
+        read -p "请输入公钥文件 crt 的路径：" cert_path_input
+        yellow "公钥文件 crt 的路径：$cert_path_input "
+        read -p "请输入密钥文件 key 的路径：" key_path_input
+        yellow "密钥文件 key 的路径：$key_path_input "
         read -p "请输入证书的域名：" domain
         yellow "证书域名：$domain"
         hy_domain=$domain
 
-        chmod +rw $cert_path
-        chmod +rw $key_path
+        mkdir -p /etc/hysteria
+        cp "$cert_path_input" /etc/hysteria/cert.crt
+        cp "$key_path_input" /etc/hysteria/private.key
+        
+        cert_path="/etc/hysteria/cert.crt"
+        key_path="/etc/hysteria/private.key"
+
+        chown hysteria:hysteria /etc/hysteria/cert.crt /etc/hysteria/private.key
+        chmod 644 /etc/hysteria/cert.crt
+        chmod 600 /etc/hysteria/private.key
     else
         green "将使用必应自签证书作为 Hysteria 2 的节点证书"
 
         cert_path="/etc/hysteria/cert.crt"
         key_path="/etc/hysteria/private.key"
+        mkdir -p /etc/hysteria
         openssl ecparam -genkey -name prime256v1 -out /etc/hysteria/private.key
         openssl req -new -x509 -days 36500 -key /etc/hysteria/private.key -out /etc/hysteria/cert.crt -subj "/CN=www.bing.com"
+        
+        chown hysteria:hysteria /etc/hysteria/cert.crt /etc/hysteria/private.key
         chmod 644 /etc/hysteria/cert.crt
         chmod 600 /etc/hysteria/private.key
         hy_domain="www.bing.com"
@@ -313,7 +324,7 @@ EOF
         last_ip=$ip
     fi
 
-    mkdir /root/hy
+    mkdir -p /root/hy
     cat <<EOF > /root/hy/hy-client.yaml
 server: $last_ip:$last_port
 
