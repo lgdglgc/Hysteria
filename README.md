@@ -23,7 +23,12 @@ bash <(wget -qO- https://raw.githubusercontent.com/lgdglgc/Hysteria/main/hysteri
 > **需要 root 权限**，支持 Debian / Ubuntu / CentOS / Fedora 及其衍生发行版。
 
 ---
+> **自用精简Clash模板**，
+```bash
+https://raw.githubusercontent.com/lgdglgc/Hysteria/main/my-clash.ini
 
+```
+---
 ## ✨ 优化特性
 
 相比原版脚本，本脚本包含以下增强：
