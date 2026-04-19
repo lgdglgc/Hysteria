@@ -83,7 +83,7 @@ inst_cert(){
             else
                 realip
             fi
-            
+
             read -p "请输入需要申请证书的域名：" domain
             [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
             green "已输入的域名：$domain" && sleep 1
@@ -92,7 +92,7 @@ inst_cert(){
                 domainIP=$(dig @2001:4860:4860::8888 +time=2 aaaa +short "$domain" 2>/dev/null)
             fi
             if echo $domainIP | grep -q "network unreachable\|timed out" || [[ -z $domainIP ]] ; then
-                red "未解析出 IP，请检查域名是否输入有误" 
+                red "未解析出 IP，请检查域名是否输入有误"
                 yellow "是否尝试强行匹配？"
                 green "1. 是，将使用强行匹配"
                 green "2. 否，退出脚本"
@@ -205,8 +205,8 @@ inst_jump(){
                 fi
             done
         fi
-        iptables -t nat -A PREROUTING -p udp --dport $firstport:$endport  -j DNAT --to-destination :$port
-        ip6tables -t nat -A PREROUTING -p udp --dport $firstport:$endport  -j DNAT --to-destination :$port
+        iptables -t nat -A PREROUTING -p udp --dport $firstport:$endport -j DNAT --to-destination :$port
+        ip6tables -t nat -A PREROUTING -p udp --dport $firstport:$endport -j DNAT --to-destination :$port
         netfilter-persistent save >/dev/null 2>&1
     else
         red "将继续使用单端口模式"
@@ -220,7 +220,7 @@ inst_pwd(){
 }
 
 inst_site(){
-    read -rp "请输入 Hysteria 2 的伪装网站地址 （去除https://） [回车世嘉maimai日本网站]：" proxysite
+    read -rp "请输入 Hysteria 2 的伪装网站地址（去除https://）[回车世嘉maimai日本网站]：" proxysite
     [[ -z $proxysite ]] && proxysite="maimai.sega.jp"
     yellow "使用在 Hysteria 2 节点的伪装网站为：$proxysite"
 }
@@ -243,7 +243,7 @@ insthysteria(){
     fi
     ${PACKAGE_INSTALL[int]} curl wget sudo qrencode procps iptables-persistent netfilter-persistent
 
-    wget -N https://raw.githubusercontent.com/lgdglgc/Hysteria/main/hy2/install_server.sh
+    wget -N https://raw.githubusercontent.com/lgdglgc/Hysteria/main/install_server.sh
     bash install_server.sh
     rm -f install_server.sh
 
@@ -347,6 +347,7 @@ transport:
   udp:
     hopInterval: 10s
 EOF
+
     cat <<EOF > /root/hy/hy-client.json
 {
   "server": "$last_ip:$last_port",
@@ -382,6 +383,7 @@ EOF
   }
 }
 EOF
+
     cat <<EOF > /root/hy/clash-meta.yaml
 mixed-port: 7890
 external-controller: 127.0.0.1:9090
@@ -412,7 +414,7 @@ proxy-groups:
     type: select
     proxies:
       - Hysteria2-lgdglgc
-      
+
 rules:
   - GEOIP,CN,DIRECT
   - MATCH,Proxy
@@ -492,7 +494,7 @@ hysteriaswitch(){
 
 changeport(){
     oldport=$(cat /etc/hysteria/config.yaml 2>/dev/null | sed -n 1p | awk '{print $2}' | awk -F ":" '{print $2}')
-    
+
     read -p "设置 Hysteria 2 端口[1-65535]（回车则随机分配端口）：" port
     [[ -z $port ]] && port=$(shuf -i 20000-50000 -n 1)
 
@@ -553,7 +555,7 @@ change_cert(){
 
 changeproxysite(){
     oldproxysite=$(cat /etc/hysteria/config.yaml | grep url | awk -F " " '{print $2}' | awk -F "https://" '{print $2}')
-    
+
     inst_site
 
     sed -i "s#$oldproxysite#$proxysite#g" /etc/hysteria/config.yaml
@@ -593,19 +595,20 @@ showconf(){
 }
 
 update_core(){
-    wget -N https://raw.githubusercontent.com/lgdglgc/Hysteria/main/hy2/install_server.sh
+    wget -N https://raw.githubusercontent.com/lgdglgc/Hysteria/main/install_server.sh
     bash install_server.sh
-    
+
     rm -f install_server.sh
 }
 
 menu() {
     clear
     echo "#############################################################"
-    echo -e "#                  ${RED}Hysteria 2 一键安装脚本优化版${PLAIN}               #"
+    echo -e "#                  ${RED}Hysteria 2 一键安装脚本优化版${PLAIN}                  #"
     echo -e "# ${GREEN}作者${PLAIN}: SheepKeeper'S Blog                                  #"
     echo -e "# ${GREEN}博客${PLAIN}: https://blog.kqsdw.me                               #"
-    echo -e "# ${GREEN}GitHub 项目${PLAIN}: https://github.com/lgdglgc/Hysteria          #"
+    echo -e "# ${GREEN}GitHub 项目${PLAIN}: https://github.com/lgdglgc/Hysteria           #"
+    echo -e "# ${GREEN}GitLab 项目${PLAIN}: https://gitlab.com/lgdglgc/hysteria           #"
     echo "#############################################################"
     echo ""
     echo -e " ${GREEN}1.${PLAIN} 安装 Hysteria 2"
